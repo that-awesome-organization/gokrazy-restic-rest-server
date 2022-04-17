@@ -15,17 +15,21 @@ var (
 )
 
 func main() {
-	// mount desired device and directory
-	err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, "")
-	if err != nil {
-		log.Fatal("error in mounting", err)
-	}
 
-	defer func(target string) {
-		if err := syscall.Unmount(target, syscall.MNT_FORCE); err != nil {
-			log.Println("error in unmounting", err)
+	// mount desired device and directory
+	if mntSource != "" || mntTarget != "" || mntFSType != "" {
+		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, "")
+		if err != nil {
+			log.Fatal("error in mounting", err)
 		}
-	}(mntTarget)
+
+		// unmount once the program is completed
+		defer func(target string) {
+			if err := syscall.Unmount(target, syscall.MNT_FORCE); err != nil {
+				log.Println("error in unmounting", err)
+			}
+		}(mntTarget)
+	}
 
 	// run rest-server command
 	restserver := exec.Command(
@@ -37,7 +41,7 @@ func main() {
 	restserver.Stdin = os.Stdin
 	restserver.Stdout = os.Stdout
 	restserver.Stderr = os.Stderr
-	err = restserver.Run()
+	err := restserver.Run()
 	if err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
