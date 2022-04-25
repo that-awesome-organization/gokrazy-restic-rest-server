@@ -18,6 +18,7 @@ var (
 func main() {
 	// mount desired device and directory
 	if mntSource != "" || mntTarget != "" || mntFSType != "" {
+		log.Printf("mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
 		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
 		if err != nil {
 			log.Fatalln("error in mounting", err)
