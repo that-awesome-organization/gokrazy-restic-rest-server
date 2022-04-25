@@ -16,7 +16,6 @@ var (
 )
 
 func main() {
-
 	// mount desired device and directory
 	if mntSource != "" || mntTarget != "" || mntFSType != "" {
 		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
@@ -52,5 +51,4 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%v: %v\n", restserver.Args, err)
 		}
 	}
-
 }
