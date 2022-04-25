@@ -12,15 +12,16 @@ var (
 	mntSource = os.Getenv("MNT_SOURCE")
 	mntTarget = os.Getenv("MNT_TARGET")
 	mntFSType = os.Getenv("MNT_FSTYPE")
+	mntData   = os.Getenv("MNT_DATA")
 )
 
 func main() {
 
 	// mount desired device and directory
 	if mntSource != "" || mntTarget != "" || mntFSType != "" {
-		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, "")
+		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
 		if err != nil {
-			log.Fatal("error in mounting", err)
+			log.Fatalln("error in mounting", err)
 		}
 
 		// unmount once the program is completed

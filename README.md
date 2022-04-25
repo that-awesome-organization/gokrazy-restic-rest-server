@@ -58,7 +58,7 @@ command is being run.
 # in the same directory as go.mod
 
 mkdir -p env/github.com/dtchanpura/gokrazy-rest-server/
-cat < EOF > env/github.com/dtchanpura/gokrazy-rest-server/env.txt
+cat << EOF > env/github.com/dtchanpura/gokrazy-rest-server/env.txt
 MNT_SOURCE=/dev/sda1
 MNT_TARGET=/perm/rest-server
 MNT_FSTYPE=exfat
