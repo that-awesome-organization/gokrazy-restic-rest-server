@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -31,7 +35,10 @@ func main() {
 
 	// run the command
 	go func() {
-		mount()
+		// mount desired device and directory
+		if mntSource != "" || mntTarget != "" || mntFSType != "" {
+			mount()
+		}
 		err := run()
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
@@ -66,13 +73,29 @@ func run() error {
 }
 
 func mount() error {
-	// mount desired device and directory
-	if mntSource != "" || mntTarget != "" || mntFSType != "" {
-		log.Printf("mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
-		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
+	log.Printf("mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
+	source := mntSource
+	// get actual devices from UUID string
+	if strings.Contains(mntSource, "UUID=") {
+		devices, err := getDevices(mntSource)
 		if err != nil {
-			return fmt.Errorf("error in mounting: %w", err)
+			return fmt.Errorf("error getting devices: %w", err)
 		}
+		source = devices[0]
+		mntDataStrings := []string{}
+		for _, d := range devices {
+			mntDataStrings = append(mntDataStrings, "device="+d)
+		}
+		if mntData == "" {
+			mntData = strings.Join(mntDataStrings, ",")
+		} else {
+			mntData = mntData + "," + strings.Join(mntDataStrings, ",")
+		}
+	}
+
+	err := syscall.Mount(source, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
+	if err != nil {
+		return fmt.Errorf("error in mounting: %w", err)
 	}
 	return nil
 }
@@ -81,4 +104,34 @@ func unmount() {
 	if err := syscall.Unmount(mntTarget, syscall.MNT_FORCE); err != nil {
 		log.Println("error in unmounting", err)
 	}
+}
+
+func getDevices(source string) ([]string, error) {
+	o, err := exec.Command("blkid").Output()
+	if err != nil {
+		return nil, fmt.Errorf("error running blkid: %w", err)
+	}
+
+	sc := bufio.NewScanner(bytes.NewBuffer(o))
+	devices := []string{}
+	for sc.Scan() {
+		if sc.Err() == io.EOF {
+			break
+		}
+		if sc.Text() == "" {
+			continue
+		}
+		if !strings.Contains(source, sc.Text()) {
+			continue
+		}
+
+		splitString := strings.Split(sc.Text(), ":")
+		if len(splitString) < 2 {
+			return nil, fmt.Errorf("invalid blkid string %q", sc.Text())
+		}
+
+		devices = append(devices, splitString[0])
+	}
+
+	return devices, nil
 }
