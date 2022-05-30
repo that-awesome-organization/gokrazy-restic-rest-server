@@ -73,10 +73,10 @@ func run() error {
 }
 
 func mount() error {
-	log.Printf("mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
+	log.Printf("initial mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
 	source := mntSource
 	// get actual devices from UUID string
-	if strings.Contains(mntSource, "UUID=") {
+	if strings.HasPrefix(mntSource, "UUID=") {
 		devices, err := getDevices(mntSource)
 		if err != nil {
 			return fmt.Errorf("error getting devices: %w", err)
@@ -92,7 +92,7 @@ func mount() error {
 			mntData = mntData + "," + strings.Join(mntDataStrings, ",")
 		}
 	}
-
+	log.Printf("final mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
 	err := syscall.Mount(source, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
 	if err != nil {
 		return fmt.Errorf("error in mounting: %w", err)
