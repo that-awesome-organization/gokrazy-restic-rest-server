@@ -110,7 +110,9 @@ func unmount() {
 }
 
 func getDevices(source string) ([]string, error) {
-	o, err := exec.Command("blkid").Output()
+	c := exec.Command("blkid")
+	c.Env = append(c.Env, "PATH=/usr/local/bin:/perm/bin:/usr/bin")
+	o, err := c.Output()
 	if err != nil {
 		return nil, fmt.Errorf("error running blkid: %w", err)
 	}
