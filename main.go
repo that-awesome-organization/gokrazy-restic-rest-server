@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"syscall"
 )
 
@@ -16,26 +17,41 @@ var (
 )
 
 func main() {
-	// mount desired device and directory
-	if mntSource != "" || mntTarget != "" || mntFSType != "" {
-		log.Printf("mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
-		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
-		if err != nil {
-			log.Fatalln("error in mounting", err)
-		}
+	sigs := make(chan os.Signal, 1)
 
-		// unmount once the program is completed
-		defer func(target string) {
-			if err := syscall.Unmount(target, syscall.MNT_FORCE); err != nil {
-				log.Println("error in unmounting", err)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	done := make(chan bool, 1)
+
+	// catch sigterm
+	go func() {
+		sig := <-sigs
+		log.Println("got signal", sig)
+		done <- true
+	}()
+
+	// run the command
+	go func() {
+		mount()
+		err := run()
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				os.Exit(status.ExitStatus())
 			}
-		}(mntTarget)
-	}
+		} else {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+	}()
 
+	// wait for signal
+	<-done
+	unmount()
+}
+
+func run() error {
 	// run rest-server command
 	restserver := exec.Command(
 		"/usr/local/bin/rest-server",
-		os.Args...,
+		os.Args[1:]...,
 	)
 
 	restserver.Env = append(restserver.Env, os.Environ()...)
@@ -44,12 +60,25 @@ func main() {
 	restserver.Stderr = os.Stderr
 	err := restserver.Run()
 	if err != nil {
-		if exiterr, ok := err.(*exec.ExitError); ok {
-			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
-				os.Exit(status.ExitStatus())
-			}
-		} else {
-			fmt.Fprintf(os.Stderr, "%v: %v\n", restserver.Args, err)
+		return err
+	}
+	return nil
+}
+
+func mount() error {
+	// mount desired device and directory
+	if mntSource != "" || mntTarget != "" || mntFSType != "" {
+		log.Printf("mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
+		err := syscall.Mount(mntSource, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
+		if err != nil {
+			return fmt.Errorf("error in mounting: %w", err)
 		}
+	}
+	return nil
+}
+
+func unmount() {
+	if err := syscall.Unmount(mntTarget, syscall.MNT_FORCE); err != nil {
+		log.Println("error in unmounting", err)
 	}
 }
