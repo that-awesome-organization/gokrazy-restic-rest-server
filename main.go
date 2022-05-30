@@ -76,8 +76,8 @@ func run() error {
 }
 
 func mount() error {
-	log.Printf("initial mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
 	source := mntSource
+	log.Printf("initial mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", source, mntTarget, mntFSType, mntData)
 	// get actual devices from UUID string
 	if strings.HasPrefix(mntSource, "UUID=") {
 		devices, err := getDevices(mntSource)
@@ -95,7 +95,7 @@ func mount() error {
 			mntData = mntData + "," + strings.Join(mntDataStrings, ",")
 		}
 	}
-	log.Printf("final mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", mntSource, mntTarget, mntFSType, mntData)
+	log.Printf("final mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", source, mntTarget, mntFSType, mntData)
 	err := syscall.Mount(source, mntTarget, mntFSType, syscall.MS_RELATIME, mntData)
 	if err != nil {
 		return fmt.Errorf("error in mounting: %w", err)
