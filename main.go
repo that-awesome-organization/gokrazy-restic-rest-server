@@ -116,7 +116,6 @@ func getDevices(source string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error running blkid: %w", err)
 	}
-
 	sc := bufio.NewScanner(bytes.NewBuffer(o))
 	devices := []string{}
 	for sc.Scan() {
@@ -126,7 +125,7 @@ func getDevices(source string) ([]string, error) {
 		if sc.Text() == "" {
 			continue
 		}
-		if !strings.Contains(source, sc.Text()) {
+		if !strings.Contains(sc.Text(), source) {
 			continue
 		}
 
