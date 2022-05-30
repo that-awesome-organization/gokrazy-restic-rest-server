@@ -37,7 +37,10 @@ func main() {
 	go func() {
 		// mount desired device and directory
 		if mntSource != "" || mntTarget != "" || mntFSType != "" {
-			mount()
+			if err := mount(); err != nil {
+				log.Println(err)
+				os.Exit(125)
+			}
 		}
 		err := run()
 		if exiterr, ok := err.(*exec.ExitError); ok {
