@@ -1,3 +1,3 @@
 module development.thatwebsite.xyz/gokrazy/restic-rest-server
 
-go 1.17
+go 1.18
