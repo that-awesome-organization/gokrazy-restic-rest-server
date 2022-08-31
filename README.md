@@ -40,7 +40,7 @@ Before we begin, we setup the directory where we can keep package files for gokr
 ```
 go mod init rpi4-gorilla                # this is an arbitrary name
 
-go install github.com/dtchanpura/gokrazy-rest-server@latest
+go install development.thatwebsite.xyz/gokrazy/restic-rest-server@latest
 ```
 
 ## Mount Specifications
@@ -57,8 +57,8 @@ command is being run.
 ```
 # in the same directory as go.mod
 
-mkdir -p env/github.com/dtchanpura/gokrazy-rest-server/
-cat << EOF > env/github.com/dtchanpura/gokrazy-rest-server/env.txt
+mkdir -p env/development.thatwebsite.xyz/gokrazy/restic-rest-server/
+cat << EOF > env/development.thatwebsite.xyz/gokrazy/restic-rest-server/env.txt
 MNT_SOURCE=/dev/sda1
 MNT_TARGET=/perm/rest-server
 MNT_FSTYPE=exfat
@@ -73,8 +73,8 @@ from it, so the flags or arguments which we want to pass will be actually going 
 To add flags we can just create flags.txt same as the env.txt
 
 ```
-mkdir -p flags/github.com/dtchanpura/gokrazy-rest-server/
-cat < EOF > flags/github.com/dtchanpura/gokrazy-rest-server/flags.txt
+mkdir -p flags/development.thatwebsite.xyz/gokrazy/restic-rest-server/
+cat < EOF > flags/development.thatwebsite.xyz/gokrazy/restic-rest-server/flags.txt
 --path
 /perm/rest-server/restic
 ```
@@ -89,8 +89,8 @@ make it fail and retry after a second. To avoid that, we can have a delay in sta
 waitforclock feature.
 
 ```
-mkdir -p waitforclock/github.com/dtchanpura/gokrazy-rest-server/
-touch waitforclock/github.com/dtchanpura/gokrazy-rest-server/waitforclock.txt
+mkdir -p waitforclock/development.thatwebsite.xyz/gokrazy/restic-rest-server/
+touch waitforclock/development.thatwebsite.xyz/gokrazy/restic-rest-server/waitforclock.txt
 ```
 
 These commands will actually instruct gokrazy to start the rest-server only after the NTP has
