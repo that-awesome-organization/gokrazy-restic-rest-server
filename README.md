@@ -82,13 +82,24 @@ cat < EOF > flags/development.thatwebsite.xyz/gokrazy/restic-rest-server/flags.t
 Here we are defining where the root of the rest-server should be available. Also in case if there's
 need to add more arguments/flags just add it in this file separated by new lines.
 
+### Enabling Private Access to repositories
+
+Other flags can be `--private-repos` which enables authentication and prevents anyone accessing the
+repository without basic auth.
+
+### Enabling Prometheus Metrics
+
+Passing `--prometheus` enables the Prometheus `/metrics` endpoint, but if that is used with `--private-repos`
+a new user should be created with name metrics to access the endpoint.
+
+
 ## Other options
 
 In some cases the command/program will run before the /perm/ directory is mounted and that will
 make it fail and retry after a second. To avoid that, we can have a delay in startup using
 waitforclock feature.
 
-```
+```bash
 mkdir -p waitforclock/development.thatwebsite.xyz/gokrazy/restic-rest-server/
 touch waitforclock/development.thatwebsite.xyz/gokrazy/restic-rest-server/waitforclock.txt
 ```
