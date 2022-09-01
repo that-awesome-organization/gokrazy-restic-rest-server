@@ -60,7 +60,7 @@ func main() {
 func run() error {
 	// run rest-server command
 	restserver := exec.Command(
-		"/usr/local/bin/rest-server",
+		"/user/rest-server",
 		os.Args[1:]...,
 	)
 
@@ -84,11 +84,14 @@ func mount() error {
 		if err != nil {
 			return fmt.Errorf("error getting devices: %w", err)
 		}
+
+		// select first device to use it as source
 		source = devices[0]
 		mntDataStrings := []string{}
 		for _, d := range devices {
 			mntDataStrings = append(mntDataStrings, "device="+d)
 		}
+
 		if mntData == "" {
 			mntData = strings.Join(mntDataStrings, ",")
 		} else {
