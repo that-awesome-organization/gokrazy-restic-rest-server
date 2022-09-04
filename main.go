@@ -87,15 +87,17 @@ func mount() error {
 
 		// select first device to use it as source
 		source = devices[0]
-		mntDataStrings := []string{}
-		for _, d := range devices {
-			mntDataStrings = append(mntDataStrings, "device="+d)
-		}
+		if mntFSType == "btrfs" {
+			mntDataStrings := []string{}
+			for _, d := range devices {
+				mntDataStrings = append(mntDataStrings, "device="+d)
+			}
 
-		if mntData == "" {
-			mntData = strings.Join(mntDataStrings, ",")
-		} else {
-			mntData = mntData + "," + strings.Join(mntDataStrings, ",")
+			if mntData == "" {
+				mntData = strings.Join(mntDataStrings, ",")
+			} else {
+				mntData = mntData + "," + strings.Join(mntDataStrings, ",")
+			}
 		}
 	}
 	log.Printf("final mount parameters - mntSource: %q, mntTarget: %q, mntFSType: %q, mntData: %q", source, mntTarget, mntFSType, mntData)
