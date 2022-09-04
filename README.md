@@ -52,6 +52,7 @@ gokr-packer -hostname rpi4-gorilla.local \
   github.com/gokrazy/breakglass \
   github.com/gokrazy/serial-busybox \
   github.com/restic/rest-server/cmd/rest-server \
+  development.thatwebsite.xyz/gokrazy/util-linux \
   development.thatwebsite.xyz/gokrazy/restic-rest-server
 ```
 
