@@ -37,10 +37,30 @@ of restic's rest-server into `/usr/local/bin` with mount options.
 
 Before we begin, we setup the directory where we can keep package files for gokrazy.
 
-```
+```bash
 go mod init rpi4-gorilla                # this is an arbitrary name
 
-go install development.thatwebsite.xyz/gokrazy/restic-rest-server@latest
+go get development.thatwebsite.xyz/gokrazy/restic-rest-server@latest
+go get github.com/restic/rest-server@v0.11.0
+```
+
+The gokr-packer will need to add these two packages in the list.
+
+```bash
+gokr-packer -hostname rpi4-gorilla.local \
+  -update=yes -serial_console=disabled \
+  github.com/gokrazy/breakglass \
+  github.com/gokrazy/serial-busybox \
+  github.com/restic/rest-server/cmd/rest-server \
+  development.thatwebsite.xyz/gokrazy/util-linux \
+  development.thatwebsite.xyz/gokrazy/restic-rest-server
+```
+
+We don't want rest-server to start directly, so we disable it using dontstart.txt.
+
+```bash
+mkdir -p dontstart/github.com/restic/rest-server/cmd/rest-server
+touch dontstart/github.com/restic/rest-server/cmd/rest-server/dontstart.txt
 ```
 
 ## Mount Specifications
